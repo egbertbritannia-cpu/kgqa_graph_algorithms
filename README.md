@@ -1,11 +1,5 @@
 # Applying Graph Algorithms to Knowledge Graph Construction for Academic Question-Answering Systems
 
-**Mentor:** Nguyễn Thanh Điền  
-**Members:**
-- Quách Thế Dương (SE203060)
-- Hoàng Đức Tài (SE201718)
-- Phạm Văn Đức Duy (SE194521)
-
 ## 📌 Research Overview
 This research focuses on applying classical graph algorithms (BFS, DFS, Dijkstra, A*) to organize and query a knowledge graph of academic concepts. The goal is to support concept-level question answering in an explainable manner, where the retrieved path between concepts serves as both the answer and its logical explanation.
 
