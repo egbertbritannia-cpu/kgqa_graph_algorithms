@@ -1,6 +1,7 @@
 import networkx as nx
 import json
 import os
+import argparse
 
 def extract_subgraph(full_graph, root_node, max_depth=5):
     """
@@ -54,34 +55,53 @@ def save_subgraph(graph, output_path):
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2)
 
+
+def build_and_save_subgraph(input_file, output_file, root, max_depth):
+    """Build the full CSO graph, prune it from one root, and save the result."""
+    from src.data_loader import load_cso_triples
+    from src.graph_builder import build_full_graph
+
+    print(f"Loading triples from {input_file}...")
+    triples = load_cso_triples(input_file)
+
+    print("Building full graph...")
+    full_graph = build_full_graph(triples)
+
+    print(f"Extracting subgraph from root '{root}' with max depth {max_depth}...")
+    subgraph = extract_subgraph(full_graph, root, max_depth)
+
+    print(
+        f"Subgraph extracted: {subgraph.number_of_nodes()} nodes, "
+        f"{subgraph.number_of_edges()} edges."
+    )
+    print(f"Saving to {output_file}...")
+    save_subgraph(subgraph, output_file)
+    print("Done.")
+
+
+def parse_args():
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    default_input = os.path.join(base_dir, "data", "raw", "CSO.3.5.csv")
+    default_output = os.path.join(base_dir, "data", "processed", "subgraph_data_mining.json")
+
+    parser = argparse.ArgumentParser(description="Prune a CSO graph into a smaller subgraph.")
+    parser.add_argument("--input", default=default_input, help="Path to the raw CSO CSV file.")
+    parser.add_argument("--output", default=default_output, help="Path for the pruned graph JSON.")
+    parser.add_argument("--root", default="data_mining", help="Root concept, e.g. artificial_intelligence.")
+    parser.add_argument("--max-depth", type=int, default=5, help="Maximum hierarchy depth to follow.")
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
     import sys
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     sys.path.append(base_dir)
-    
-    from src.data_loader import load_cso_triples
-    from src.graph_builder import build_full_graph
-    
-    test_file = os.path.join(base_dir, "data", "raw", "CSO.3.5.csv")
-    output_file = os.path.join(base_dir, "data", "processed", "subgraph_data_science.json")
-    
-    if os.path.exists(test_file):
-        print("Loading triples...")
-        triples = load_cso_triples(test_file)
-        
-        print("Building full graph...")
-        full_graph = build_full_graph(triples)
-        
-        root = "data_mining"
-        max_depth = 5
-        print(f"Extracting subgraph for root '{root}' with max depth {max_depth}...")
-        
+
+    args = parse_args()
+    if not os.path.exists(args.input):
+        print(f"Input file not found: {args.input}")
+    else:
         try:
-            subgraph = extract_subgraph(full_graph, root, max_depth)
-            print(f"Subgraph extracted: {subgraph.number_of_nodes()} nodes, {subgraph.number_of_edges()} edges.")
-            
-            print(f"Saving to {output_file}...")
-            save_subgraph(subgraph, output_file)
-            print("Done!")
-        except Exception as e:
-            print(f"Error: {e}")
+            build_and_save_subgraph(args.input, args.output, args.root, args.max_depth)
+        except Exception as error:
+            print(f"Error: {error}")
