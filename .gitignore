@@ -15,3 +15,6 @@ __pycache__/
 # IDEs
 .vscode/
 .idea/
+
+# Study Materials
+docs/study_materials/
